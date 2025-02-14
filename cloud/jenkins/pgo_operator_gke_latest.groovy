@@ -233,7 +233,7 @@ void runTest(Integer TEST_ID) {
                     export KUBECONFIG=/tmp/$CLUSTER_NAME-$clusterSuffix
                     export PATH="\${KREW_ROOT:-\$HOME/.krew}/bin:\$PATH"
 
-                    kubectl kuttl test --config e2e-tests/kuttl.yaml --test "^$testName\$"
+                    kubectl kuttl test --config e2e-tests/kuttl.yaml --test "^$testName\$" --report xml
                 """
             }
             pushArtifactFile("$GIT_BRANCH-$GIT_SHORT_COMMIT-$testName-$USED_PLATFORM_VER-$PPG_TAG-CW_$CLUSTER_WIDE-$PARAMS_HASH")
@@ -270,18 +270,6 @@ void pushArtifactFile(String FILE_NAME) {
     }
 }
 
-TestsReport = '<testsuite name=\\"PG-GKE-latest\\">\n'
-void makeReport() {
-    echo "=========================[ Generating Test Report ]========================="
-    for (int i=0; i<tests.size(); i++) {
-        def testResult = tests[i]["result"]
-        def testTime = tests[i]["time"]
-        def testName = tests[i]["name"]
-
-        TestsReport = TestsReport + '<testcase name=\\"' + testName + '\\" time=\\"' + testTime + '\\"><'+ testResult +'/></testcase>\n'
-    }
-    TestsReport = TestsReport + '</testsuite>\n'
-}
 
 void shutdownCluster(String CLUSTER_SUFFIX) {
     withCredentials([string(credentialsId: 'GCP_PROJECT_ID', variable: 'GCP_PROJECT'), file(credentialsId: 'gcloud-key-file', variable: 'CLIENT_SECRET_FILE')]) {
@@ -430,10 +418,7 @@ pipeline {
     post {
         always {
             echo "CLUSTER ASSIGNMENTS\n" + tests.toString().replace("], ","]\n").replace("]]","]").replaceFirst("\\[","")
-            makeReport()
-            sh """
-                echo "$TestsReport" > TestsReport.xml
-            """
+            
             step([$class: 'JUnitResultArchiver', testResults: '*.xml', healthScaleFactor: 1.0])
             archiveArtifacts '*.xml'
 
