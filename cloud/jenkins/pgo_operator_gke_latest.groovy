@@ -236,9 +236,9 @@ void runTest(Integer TEST_ID) {
                     kubectl kuttl test --config e2e-tests/kuttl.yaml --test "^$testName\$" --report xml
                     cp kuttl-report.xml ../
                 """
-                step([$class: 'JUnitResultArchiver', testResults: 'kuttl-report.xml', healthScaleFactor: 1.0])
-                archiveArtifacts 'kuttl-report.xml'
             }
+            step([$class: 'JUnitResultArchiver', testResults: 'kuttl-report.xml', healthScaleFactor: 1.0])
+            archiveArtifacts 'kuttl-report.xml'
             pushArtifactFile("$GIT_BRANCH-$GIT_SHORT_COMMIT-$testName-$USED_PLATFORM_VER-$PPG_TAG-CW_$CLUSTER_WIDE-$PARAMS_HASH")
             tests[TEST_ID]["result"] = "passed"
             return true
