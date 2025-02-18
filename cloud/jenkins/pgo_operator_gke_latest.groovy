@@ -237,7 +237,8 @@ void runTest(Integer TEST_ID) {
                     cp kuttl-report.xml ../
                 """
                 step([$class: 'JUnitResultArchiver', testResults: 'kuttl-report.xml', healthScaleFactor: 1.0])
-
+                archiveArtifacts 'kuttl-report.xml'
+                junit 'kuttl-report.xml'
             }
             pushArtifactFile("$GIT_BRANCH-$GIT_SHORT_COMMIT-$testName-$USED_PLATFORM_VER-$PPG_TAG-CW_$CLUSTER_WIDE-$PARAMS_HASH")
             tests[TEST_ID]["result"] = "passed"
