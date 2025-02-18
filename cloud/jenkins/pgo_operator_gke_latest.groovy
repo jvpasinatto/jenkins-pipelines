@@ -237,8 +237,6 @@ void runTest(Integer TEST_ID) {
                     cp kuttl-report.xml ../
                 """
             }
-            step([$class: 'JUnitResultArchiver', testResults: 'kuttl-report.xml', healthScaleFactor: 1.0])
-            archiveArtifacts 'kuttl-report.xml'
             pushArtifactFile("$GIT_BRANCH-$GIT_SHORT_COMMIT-$testName-$USED_PLATFORM_VER-$PPG_TAG-CW_$CLUSTER_WIDE-$PARAMS_HASH")
             tests[TEST_ID]["result"] = "passed"
             return true
@@ -254,8 +252,6 @@ void runTest(Integer TEST_ID) {
             return false
         }
         finally {
-            step([$class: 'JUnitResultArchiver', testResults: 'kuttl-report.xml', healthScaleFactor: 1.0])
-            archiveArtifacts 'kuttl-report.xml'
             def timeStop = new Date().getTime()
             def durationSec = (timeStop - timeStart) / 1000
             tests[TEST_ID]["time"] = durationSec
