@@ -234,8 +234,10 @@ void runTest(Integer TEST_ID) {
                     export PATH="\${KREW_ROOT:-\$HOME/.krew}/bin:\$PATH"
 
                     kubectl kuttl test --config e2e-tests/kuttl.yaml --test "^$testName\$" --report xml
-                    stash includes: 'kuttl-report.xml', name: 'cluster1-test-report'
+                    cp kuttl-report.xml ../
                 """
+                step([$class: 'JUnitResultArchiver', testResults: 'kuttl-report.xml', healthScaleFactor: 1.0])
+
             }
             pushArtifactFile("$GIT_BRANCH-$GIT_SHORT_COMMIT-$testName-$USED_PLATFORM_VER-$PPG_TAG-CW_$CLUSTER_WIDE-$PARAMS_HASH")
             tests[TEST_ID]["result"] = "passed"
@@ -419,11 +421,6 @@ pipeline {
     post {
         always {
             echo "CLUSTER ASSIGNMENTS\n" + tests.toString().replace("], ","]\n").replace("]]","]").replaceFirst("\\[","")
-            unstash 'cluster1-test-report'
-            sh "pwd"
-            sh "ls"
-            step([$class: 'JUnitResultArchiver', testResults: '*.xml', healthScaleFactor: 1.0])
-            archiveArtifacts '*.xml'
 
             script {
                 if (currentBuild.result != null && currentBuild.result != 'SUCCESS') {
