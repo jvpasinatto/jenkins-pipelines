@@ -244,6 +244,8 @@ void runTest(Integer TEST_ID) {
             return true
         }
         catch (exc) {
+            step([$class: 'JUnitResultArchiver', testResults: 'kuttl-report.xml', healthScaleFactor: 1.0])
+            archiveArtifacts 'kuttl-report.xml'
             if (retryCount >= 1) {
                 currentBuild.result = 'FAILURE'
                 return true
@@ -252,6 +254,8 @@ void runTest(Integer TEST_ID) {
             return false
         }
         finally {
+            step([$class: 'JUnitResultArchiver', testResults: 'kuttl-report.xml', healthScaleFactor: 1.0])
+            archiveArtifacts 'kuttl-report.xml'
             def timeStop = new Date().getTime()
             def durationSec = (timeStop - timeStart) / 1000
             tests[TEST_ID]["time"] = durationSec
